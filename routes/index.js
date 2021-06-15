@@ -537,7 +537,7 @@ router.post('/create/utilisateur', function (req, res) {
                     message: "Utilisateur créé"
                 });
             } else {
-                return res.send({message: "Utilisateur "+ req.body.nom_utilisateur +" existant"});
+                return res.send({message: "Utilisateur " + req.body.nom_utilisateur + " existant"});
             }
         });
     }
@@ -560,13 +560,17 @@ router.post('/login', function (req, res) {
                 req.session.utilisateur = utilisateur[0];
                 console.log(req.session.utilisateur);
                 return res.send({
-                    etat: "utilisateur " + utilisateur[0].nom_utilisateur + " authentifié",
+                    ok: true,
+                    etat: "Bonjour" + utilisateur[0].nom_utilisateur + " !",
                     nom_utilisateur: utilisateur[0].nom_utilisateur,
                     roleId: utilisateur[0].statusId,
                     role: utilisateur[0].status.type
                 });
             } else {
-                return res.send({etat: "non authentifié"})
+                return res.send({
+                    ok: false,
+                    etat: "Identifiant ou mot de passe incorrect"
+                })
             }
         })
     }
@@ -574,7 +578,7 @@ router.post('/login', function (req, res) {
 
 router.get('/logout', estAuth, function (req, res) {
     req.session.destroy();
-    res.send({etat: "Désauthentification"});
+    res.send({etat: "Au revoir !"});
 });
 
 function estAuth(req, res, next) {
@@ -582,7 +586,7 @@ function estAuth(req, res, next) {
         console.log(req.session);
         next();
     } else {
-        return res.send({etat: "Echec de l'authentification, ou vous n'êtes pas connecté"});
+        return res.send({etat: "Echec de l'authentification"});
     }
 }
 
