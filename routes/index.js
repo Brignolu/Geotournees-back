@@ -89,7 +89,7 @@ router.get('/coordonnees', function (req, res, next) {
  */
 
 router.post('/create/coordonnees', function (req, res, next) {
-    console.log(req.body.abonnes)
+    console.log(req.body.abonnes);
     Coordonnees.create({
         lat: req.body.lat,
         long: req.body.lon,
@@ -150,7 +150,7 @@ router.get('/abonnes', function (req, res, next) {
  */
 
 router.post('/create/abonne', function (req, res, next) {
-    console.log(req.body.abonnes)
+    console.log(req.body.abonnes);
     Abonnes.create({
         numero_abo: req.body.numero_abo,
         transmetteur: req.body.transmetteur,
@@ -524,7 +524,7 @@ router.post('/create/utilisateur', function (req, res) {
             nom: req.body.nom,
             nom_utilisateur: req.body.nom_utilisateur,
             mot_de_passe: req.body.mot_de_passe,
-            statusId: 1
+            statusId: req.body.statusId
         };
         Utilisateurs.findOrCreate({
             where: {
@@ -546,8 +546,10 @@ router.post('/create/utilisateur', function (req, res) {
 
 router.post('/login', function (req, res) {
     if (!req.body.nom_utilisateur || !req.body.mot_de_passe) {
-        res.status("400");
-        return res.send("Identifiant ou mot de passe manquant !");
+        return res.send({
+            ok: false,
+            etat: "Identifiant ou mot de passe manquant !"
+        });
     } else {
         Utilisateurs.findAll({
             where: {
@@ -578,7 +580,9 @@ router.post('/login', function (req, res) {
 
 router.get('/logout', estAuth, function (req, res) {
     req.session.destroy();
-    res.send({etat: "Au revoir !"});
+    res.send({
+        ok: false,
+        etat: "Au revoir !"});
 });
 
 function estAuth(req, res, next) {
