@@ -2,15 +2,6 @@ var express = require('express');
 var router = express.Router();
 var db = require('../config/db.config.js')
 
-/*
-const jwt = require("jsonwebtoken");
-expressjwt = require("express-jwt");
-const jwtCheck = expressjwt({
-    secret: "mykey",
-    algorithms:["HS256"]
-});
-*/
-
 // Chargement des modèles
 const Abonnes = db.abonnes
 const Adresses = db.adresses
@@ -31,35 +22,35 @@ router.get('/', function (req, res, next) {
 
 /**
  * @swagger
- * /coordonnes:
+ * /coordonnees:
  *   get:
- *     summary: Renvoie les coordonnées.
+ *     summary: Renvoie toutes les coordonnées.
  *     responses:
  *       200:
- *         description: Created
+ *         description: Réponse Valide
  *         content:
  *           application/json:
  *             schema:
  *               type: object
  *               properties:
  *                 id:
- *                   type: object
- *                   properties:
+ *                   type: integer
  *                 lat:
- *                   type: float
+ *                   type: number
+ *                   format: float
  *                 lon:
- *                   type: float
+ *                   type: number
+ *                   format: float
  *                 personneId:
- *                   type: int
+ *                   type: integer
+ *
  */
-
-
 router.get('/coordonnees', function (req, res, next) {
     var coordonnes = Coordonnees.findAll({
         raw: true,
         id: req.params.id,
     }).then(result => {
-        return res.send(result);
+        return res.status(200).send(result);
     }).catch(err => console.log(err))
     return coordonnes;
 });
@@ -68,48 +59,67 @@ router.get('/coordonnees', function (req, res, next) {
  * @swagger
  * /create/coordonnees:
  *   post:
- *     summary: Renvoie les coordonnées.
+ *     summary: Crée un couple de coordonnées.
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               latitude:
+ *                 type: number
+ *                 format: float
+ *               longitude:
+ *                 type: number
+ *                 format: float
+ *               personneId:
+ *                 type: integer
  *     responses:
- *       200:
- *         description: Created
+ *       401:
+ *         description: Opération Interdite
+ *       201:
+ *         description: Réponse Valide
  *         content:
  *           application/json:
  *             schema:
  *               type: object
  *               properties:
  *                 id:
- *                   type: object
- *                   properties:
- *                 lat:
- *                   type: float
- *                 lon:
- *                   type: float
+ *                   type: integer
+ *                 latitude:
+ *                   type: number
+ *                   format: float
+ *                 longitude:
+ *                   type: number
+ *                   format: float
  *                 personneId:
- *                   type: int
+ *                   type: integer
  */
-
 router.post('/create/coordonnees', function (req, res, next) {
-    console.log(req.body.abonnes);
-    Coordonnees.create({
-        lat: req.body.lat,
-        long: req.body.lon,
-        adresseId: req.body.adresseId
-    }).then(coordonnee => {
-        console.log(coordonnee.get({
-            plain: true
-        }));
-        res.send(coordonnee);
-    });
+    // Vérifie si l'objet est vide en verifiant si il ne contient aucune clé et en verifiant si le constructeur est bien un objet
+    if (Object.keys(req.body).length === 0 && req.body.constructor === Object) {
+        res.status(401).send("Requête Invalide")
+    } else {
+        Coordonnees.create(
+            {
+                lat: req.body.latitude,
+                long: req.body.longitude,
+                adresseId: req.body.adresseId
+            }
+        ).then(coordonnee => {
+            res.status(201).send(coordonnee);
+        }).catch(err => console.log(err));
+    }
 });
 
 /**
  * @swagger
  * /abonnes:
  *   get:
- *     summary: Renvoie les abonnés.
+ *     summary: Renvoie tous les abonnés.
  *     responses:
  *       200:
- *         description: Created
+ *         description: Réponse Valide
  *         content:
  *           application/json:
  *             schema:
@@ -119,22 +129,26 @@ router.post('/create/coordonnees', function (req, res, next) {
  *                   type: object
  *                   properties:
  *                 numero_abo:
- *                   type: float
+ *                   type: number
+ *                   format: float
  *                 transmetteur:
- *                   type: float
+ *                   type: number
+ *                   format: float
  *                 identifiant_wbb:
- *                   type: float
+ *                   type: number
+ *                   format: float
  *                 personneId:
- *                   type: int
+ *                   type: integer
  */
-
 router.get('/abonnes', function (req, res, next) {
-    var abonnes = Abonnes.findAll({
-        include: Personnes,
-        raw: true,
-        id: req.params.id,
-    }).then(result => {
-        return res.send(result);
+    var abonnes = Abonnes.findAll(
+        {
+            include: Personnes,
+            raw: true,
+            id: req.params.id,
+        }
+    ).then(result => {
+        return res.status(200).send(result);
     }).catch(err => console.log(err))
     return abonnes;
 });
@@ -143,24 +157,53 @@ router.get('/abonnes', function (req, res, next) {
  * @swagger
  * /create/abonne:
  *   post:
- *     summary: Crée les abonnes.
+ *     summary: Crée un abonné.
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               numero_abo:
+ *                 type: number
+ *                 format: float
+ *               transmetteur:
+ *                 type: number
+ *                 format: float
+ *               identifiant_wbb:
+ *                 type: integer
  *     responses:
- *       200:
- *         description: Created
+ *       401:
+ *         description: Opération Interdite
+ *       201:
+ *         description: Crée
+ *         content:
+ *           application/json:
+ *             schema:
+ *             type: object
+ *             properties:
+ *               numero_abo:
+ *                 type: number
+ *                 format: float
+ *               transmetteur:
+ *                 type: number
+ *                 format: float
+ *               identifiant_wbb:
+ *                 type: integer
  */
 
 router.post('/create/abonne', function (req, res, next) {
-    console.log(req.body.abonnes);
-    Abonnes.create({
-        numero_abo: req.body.numero_abo,
-        transmetteur: req.body.transmetteur,
-        identifiant_wbb: req.body.identifiant_wbb
-    }).then(abonnes => {
-        console.log(abonnes.get({
-            plain: true
-        }));
-        res.send(abonnes);
-    });
+    if (Object.keys(req.body).length === 0 && req.body.constructor === Object) {
+        res.status(401).send("Requête Invalide")
+    } else {
+        Abonnes.create({
+            numero_abo: req.body.numero_abo,
+            transmetteur: req.body.transmetteur,
+            identifiant_wbb: req.body.identifiant_wbb
+        }).then(abonnes => {
+            res.status(201).send(abonnes);
+        });
+    }
 });
 
 /**
@@ -170,7 +213,7 @@ router.post('/create/abonne', function (req, res, next) {
  *     summary: Renvoie les états.
  *     responses:
  *       200:
- *         description: Created
+ *         description: Réponse Valide
  *         content:
  *           application/json:
  *             schema:
@@ -178,17 +221,15 @@ router.post('/create/abonne', function (req, res, next) {
  *               properties:
  *                 id:
  *                   type: object
- *                   properties:
  *                 etats:
  *                   type: string
  */
-
 router.get('/etats', function (req, res, next) {
     var etats = Etats.findAll({
         raw: true,
         id: req.params.id,
     }).then(result => {
-        return res.send(result);
+        return res.status(200).send(result);
     }).catch(err => console.log(err))
     return etats;
 });
@@ -197,20 +238,35 @@ router.get('/etats', function (req, res, next) {
  * @swagger
  * /create/etat:
  *   post:
- *     summary: Crée un état.
+ *     summary: Crée un etat.
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *              etat:
+ *                 type: number
+ *                 format: float
  *     responses:
- *       200:
- *         description: Created
+ *       401:
+ *         description: Opération Interdite
+ *       201:
+ *         description: Créé
+ *         content:
+ *           application/json:
+ *             schema:
+ *             type: object
+ *             properties:
+ *               id:
+ *                 type: integer
+ *               etat:
+ *                 type: string
  */
-
 router.post('/create/etat', function (req, res, next) {
-    console.log(req.body.etat)
     Etats.create({
         etat: req.body.etat
     }).then(etat => {
-        console.log(etat.get({
-            plain: true
-        }));
         res.send(etat);
     });
 });
@@ -222,7 +278,7 @@ router.post('/create/etat', function (req, res, next) {
  *     summary: Retourne les motifs.
  *     responses:
  *       200:
- *         description: Created
+ *         description: Réponse Valide
  *         content:
  *           application/json:
  *             schema:
@@ -234,13 +290,12 @@ router.post('/create/etat', function (req, res, next) {
  *                 etat:
  *                   type: string
  */
-
 router.get('/motifs', function (req, res, next) {
     var motif = Motifs.findAll({
         raw: true,
         id: req.params.id,
     }).then(result => {
-        return res.send(result);
+        return res.status(200).send(result);
     }).catch(err => console.log(err))
     return motif;
 });
@@ -252,20 +307,16 @@ router.get('/motifs', function (req, res, next) {
  *     summary: crée les motifs.
  *     responses:
  *       200:
- *         description: Created
+ *         description: Créé
  */
-
 router.post('/create/motif', function (req, res, next) {
-    console.log(req.body.motif)
     Motifs.create({
         motif: req.body.motif
     }).then(motif => {
-        console.log(motif.get({
-            plain: true
-        }));
         res.send(motif);
     });
 });
+
 /**
  * @swagger
  * /types:
@@ -273,7 +324,7 @@ router.post('/create/motif', function (req, res, next) {
  *     summary: Retourne les types.
  *     responses:
  *       200:
- *         description: Created
+ *         description: Créé
  *         content:
  *           application/json:
  *             schema:
@@ -290,41 +341,49 @@ router.get('/types', function (req, res, next) {
         raw: true,
         id: req.params.id,
     }).then(result => {
-        return res.send(result);
+        return res.status(200).send(result);
     }).catch(err => console.log(err))
     return types;
 });
+
 /**
  * @swagger
- * paths:
- *  /create/type:
- *      post:
- *       summary: Crée les types
- *       responses:
- *       200:
- *         description: Created
+ * /create/type:
+ *   post:
+ *     summary: Crée un type.
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *              type:
+ *                 type: number
+ *                 format: float
+ *     responses:
+ *       401:
+ *         description: Opération Interdite
+ *       201:
+ *         description: Créé
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 id:
- *                   type: integer
- *                   properties:
- *                 etat:
- *                   type: string
+ *             type: object
+ *             properties:
+ *               id:
+ *                 type: integer
+ *               etat:
+ *                 type: string
  */
 router.post('/create/type', function (req, res, next) {
     console.log(req.body.type)
     Types.create({
         type: req.body.type
     }).then(type => {
-        console.log(type.get({
-            plain: true
-        }));
         res.send(type);
     });
 });
+
 /**
  * @swagger
  * paths:
@@ -334,7 +393,7 @@ router.post('/create/type', function (req, res, next) {
  *       description: Retourne les adresses
  *       reponses:
  *       200:
- *         description: Created
+ *         description: Créé
  *         content:
  *           application/json:
  *             schema:
@@ -352,17 +411,54 @@ router.get('/adresses', function (req, res, next) {
         raw: true,
         id: req.params.id,
     }).then(result => {
-        return res.send(result);
+        return res.status(200).send(result);
     }).catch(err => console.log(err))
     return etats;
 });
+
 /**
  * @swagger
- * paths:
- *  /create/adresse:
- *      post:
- *       summary: Crée une adresse
- *       description: Crée une adresse liée au coordonnées
+ * /create/adresse:
+ *   post:
+ *     summary: Crée une adresse.
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               numero:
+ *                 type: string
+ *               rue:
+ *                 type: string
+ *               codepostal:
+ *                 type: string
+ *               ville:
+ *                 type: string
+ *               personneId:
+ *                 type: integer
+ *     responses:
+ *       401:
+ *         description: Opération Interdite
+ *       201:
+ *         description: Créé
+ *         content:
+ *           application/json:
+ *             schema:
+ *             type: object
+ *             properties:
+ *               id:
+ *                 type: integer
+ *               numero:
+ *                 type: string
+ *               rue:
+ *                 type: string
+ *               codepostal:
+ *                 type: string
+ *               ville:
+ *                 type: string
+ *               personneId:
+ *                 type: integer
  */
 router.post('/create/adresse', function (req, res, next) {
     console.log(req.body.adresse)
@@ -373,12 +469,10 @@ router.post('/create/adresse', function (req, res, next) {
         ville: req.body.ville,
         personneId: req.body.personneId
     }).then(adresse => {
-        console.log(adresse.get({
-            plain: true
-        }));
-        res.send(adresse);
+        res.status(201).send(adresse);
     });
 });
+
 /**
  * @swagger
  * paths:
@@ -388,7 +482,7 @@ router.post('/create/adresse', function (req, res, next) {
  *       description: Retourne les personnes
  *       reponses:
  *       200:
- *         description: Created
+ *         description: Réponse Valide
  *         content:
  *           application/json:
  *             schema:
@@ -415,20 +509,49 @@ router.get('/personnes', function (req, res, next) {
         raw: true,
         id: req.params.id,
     }).then(result => {
-        return res.send(result);
+        return res.status(200).send(result);
     }).catch(err => console.log(err))
     return personnes;
 });
 
 /**
  * @swagger
- * paths:
- *  /create/personne:
- *      post:
- *       summary: Crée une personne
- *       description: Crée une personne
+ * /create/personne:
+ *   post:
+ *     summary: Crée une personne.
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               nom:
+ *                 type: string
+ *               prenom:
+ *                 type: string
+ *               numtel:
+ *                 type: string
+ *               abonneId:
+ *                 type: integer
+ *     responses:
+ *       401:
+ *         description: Opération Interdite
+ *       201:
+ *         description: Créé
+ *         content:
+ *           application/json:
+ *             schema:
+ *             type: object
+ *             properties:
+ *               nom:
+ *                 type: string
+ *               prenom:
+ *                 type: string
+ *               numtel:
+ *                 type: string
+ *               abonneId:
+ *                 type: integer
  */
-
 router.post('/create/personne', function (req, res, next) {
     console.log(req.body.personnes)
     Personnes.create({
@@ -437,10 +560,7 @@ router.post('/create/personne', function (req, res, next) {
         numtel: req.body.numtel,
         abonneId: req.body.abonneId
     }).then(personne => {
-        console.log(personnes.get({
-            plain: true
-        }));
-        res.send(personne);
+        res.status(200).send(personne);
     });
 });
 
@@ -453,7 +573,7 @@ router.post('/create/personne', function (req, res, next) {
  *       description: Retourne les interventions
  *       reponses:
  *       200:
- *         description: Created
+ *         description: Réponse Valide
  *         content:
  *           application/json:
  *             schema:
@@ -469,7 +589,6 @@ router.post('/create/personne', function (req, res, next) {
  *                 num_tel:
  *                   type: string
  */
-
 router.get('/interventions', function (req, res, next) {
     var interventions = Interventions.findAll({
         include: [{model: Motifs}, {model: TypesInter}, {model: Agents}, {model: Etats}, {
@@ -484,7 +603,7 @@ router.get('/interventions', function (req, res, next) {
         }],
         raw: true,
     }).then(result => {
-        return res.send(result)
+        return res.status(200).send(result)
     }).catch(err => {
         console.log(err)
     });
@@ -492,13 +611,46 @@ router.get('/interventions', function (req, res, next) {
 
 /**
  * @swagger
- * paths:
- *  /create/intervention:
- *      post:
- *       summary: Crée une intervention
- *       description: Crée une intervention
+ * /create/intervention:
+ *   post:
+ *     summary: Crée une intervention.
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               date:
+ *                 type: string
+ *               abonneId:
+ *                 type: integer
+ *               agentId:
+ *                 type: integer
+ *               TypeId:
+ *                 type: integer
+ *               motifId:
+ *                 type: integer
+ *     responses:
+ *       401:
+ *         description: Opération Interdite
+ *       201:
+ *         description: Créé
+ *         content:
+ *           application/json:
+ *             schema:
+ *             type: object
+ *             properties:
+ *               date:
+ *                 type: string
+ *               abonneId:
+ *                 type: integer
+ *               agentId:
+ *                 type: integer
+ *               TypeId:
+ *                 type: integer
+ *               motifId:
+ *                 type: integer
  */
-
 router.post('/create/intervention', function (req, res, next) {
     console.log(req.body.interventions)
     Interventions.create({
@@ -508,17 +660,51 @@ router.post('/create/intervention', function (req, res, next) {
         typeId: req.body.typeId,
         motifId: req.body.motifId
     }).then(intervention => {
-        console.log(intervention.get({
-            plain: true
-        }));
-        res.send(intervention);
+        res.status(200).send(intervention);
     });
 });
 
+/**
+ * @swagger
+ * /create/utilisateur:
+ *   post:
+ *     summary: Crée une utilisateur.
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               nom:
+ *                 type: string
+ *               nom_utilisateur:
+ *                 type: string
+ *               mot_de_passe:
+ *                 type: string
+ *               statusId:
+ *                 type: integer
+ *     responses:
+ *       401:
+ *         description: Opération Interdite
+ *       201:
+ *         description: Créé
+ *         content:
+ *           application/json:
+ *             schema:
+ *             type: object
+ *             properties:
+ *               nom:
+ *                 type: string
+ *               nom_utilisateur:
+ *                 type: string
+ *               mot_de_passe:
+ *                 type: string
+ *               statusId:
+ *                 type: integer
+ */
 router.post('/create/utilisateur', function (req, res) {
     if (!req.body.nom_utilisateur || !req.body.mot_de_passe) {
-        res.status("400");
-        return res.send("Requête non valide !");
+        return res.status(400).send("Requête Invalide !");
     } else {
         let nouvelUtilisateur = {
             nom: req.body.nom,
@@ -533,17 +719,53 @@ router.post('/create/utilisateur', function (req, res) {
             defaults: nouvelUtilisateur
         }).then((utilisateur) => {
             if (utilisateur[1]) {
-                return res.send({
-                    message: "Utilisateur créé"
+                return res.status(201).send({
+                    message: "Utilisateur Enregistré"
                 });
             } else {
-                return res.send({message: "Utilisateur " + req.body.nom_utilisateur + " existant"});
+                return res.status(200).send({message: "Utilisateur " + req.body.nom_utilisateur + " Existant"});
             }
         });
     }
 
 });
 
+/**
+ * @swagger
+ * /login:
+ *   post:
+ *     summary: Crée une personne.
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               nom_utilisateur:
+ *                 type: string
+ *               mot_de_passe:
+ *                 type: string
+ *     responses:
+ *       401:
+ *         description: Opération Interdite
+ *       201:
+ *         description: Créé
+ *         content:
+ *           application/json:
+ *             schema:
+ *             type: object
+ *             properties:
+ *               ok:
+ *                 type: boolean
+ *               etat:
+ *                 type: string
+ *               nom_utilisateur:
+ *                 type: string
+ *               roleId:
+ *                 type: integer
+ *               role:
+ *                 type: string
+ */
 router.post('/login', function (req, res) {
     if (!req.body.nom_utilisateur || !req.body.mot_de_passe) {
         return res.send({
@@ -571,7 +793,7 @@ router.post('/login', function (req, res) {
             } else {
                 return res.send({
                     ok: false,
-                    etat: "Identifiant ou mot de passe incorrect"
+                    etat: "Identifiant ou mot de passe incorrect !"
                 })
             }
         })
@@ -582,7 +804,8 @@ router.get('/logout', estAuth, function (req, res) {
     req.session.destroy();
     res.send({
         ok: false,
-        etat: "Au revoir !"});
+        etat: "Au revoir !"
+    });
 });
 
 function estAuth(req, res, next) {
@@ -590,7 +813,7 @@ function estAuth(req, res, next) {
         console.log(req.session);
         next();
     } else {
-        return res.send({etat: "Echec de l'authentification"});
+        return res.status(400).send({etat: "Echec de l'authentification"});
     }
 }
 
@@ -599,7 +822,7 @@ function estAdmin(req, res, next) {
         console.log(req.session);
         next();
     } else {
-        return res.send({etat: "Rôle Administrateur requis"});
+        return res.status(403).send({etat: "Rôle Administrateur requis"});
     }
 }
 
@@ -608,7 +831,7 @@ function estMode(req, res, next) {
         console.log(req.session);
         next();
     } else {
-        return res.send({etat: "Rôle Moderateur requis"});
+        return res.status(403).send({etat: "Rôle Moderateur requis"});
     }
 }
 
@@ -617,24 +840,9 @@ router.get('/auth/etats', [estAuth, estAdmin], function (req, res, next) {
         raw: true,
         id: req.params.id,
     }).then(result => {
-        return res.send(result);
+        return res.status(200).send(result);
     }).catch(err => console.log(err))
     return etats;
 });
-
-
-/*
-router.post('/login', function (req, res, next) {
-    // Genère un token, l'assigne à un utilisateur.
-    const token = jwt.sign({
-        sub: Utilisateurs.id,
-        username: Utilisateurs.nom_utilisateur
-    }, "mykey", { expiresIn: "3 hours" });
-    res.status(200).send({ access_token: token })
-});
-
-router.get("/logged/interventions", jwtCheck, (req,res) => {
-});
-*/
 
 module.exports = router;
