@@ -20,6 +20,16 @@ router.get('/', function (req, res, next) {
     res.render('index', {title: 'Express'});
 });
 
+router.get('/agents', function (req, res, next) {
+    var agents = Agents.findAll({
+        raw: true,
+        id: req.params.id,
+    }).then(result => {
+        return res.status(200).send(result);
+    }).catch(err => console.log(err))
+    return agents;
+});
+
 /**
  * @swagger
  * /coordonnees:
@@ -560,7 +570,7 @@ router.post('/create/personne', function (req, res, next) {
         numtel: req.body.numtel,
         abonneId: req.body.abonneId
     }).then(personne => {
-        res.status(200).send(personne);
+        res.status(201).send(personne);
     });
 });
 
@@ -734,7 +744,7 @@ router.post('/create/utilisateur', function (req, res) {
  * @swagger
  * /login:
  *   post:
- *     summary: Crée une personne.
+ *     summary: Authentifie un utilisateur.
  *     requestBody:
  *       content:
  *         application/json:
@@ -769,7 +779,7 @@ router.post('/create/utilisateur', function (req, res) {
 router.post('/login', function (req, res) {
     if (!req.body.nom_utilisateur || !req.body.mot_de_passe) {
         return res.send({
-            ok: false,
+            success: false,
             etat: "Identifiant ou mot de passe manquant !"
         });
     } else {
@@ -784,7 +794,7 @@ router.post('/login', function (req, res) {
                 req.session.utilisateur = utilisateur[0];
                 console.log(req.session.utilisateur);
                 return res.send({
-                    ok: true,
+                    success: true,
                     etat: "Bonjour" + utilisateur[0].nom_utilisateur + " !",
                     nom_utilisateur: utilisateur[0].nom_utilisateur,
                     roleId: utilisateur[0].statusId,
@@ -792,7 +802,7 @@ router.post('/login', function (req, res) {
                 });
             } else {
                 return res.send({
-                    ok: false,
+                    success: false,
                     etat: "Identifiant ou mot de passe incorrect !"
                 })
             }
@@ -803,7 +813,7 @@ router.post('/login', function (req, res) {
 router.get('/logout', estAuth, function (req, res) {
     req.session.destroy();
     res.send({
-        ok: false,
+        success: false,
         etat: "Au revoir !"
     });
 });

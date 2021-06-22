@@ -32,13 +32,13 @@ db.status = require('../models/status.model')(sequelize, Sequelize);
 db.adresses.hasOne(db.coordonnes) // One to One
 db.coordonnes.belongsTo(db.adresses)
 
-db.personnes.hasMany(db.adresses) //many to One
+db.personnes.hasMany(db.adresses) //Many to One
 db.adresses.belongsTo(db.personnes)
 
 db.abonnes.hasOne(db.personnes)
 db.personnes.belongsTo(db.abonnes)
 
-db.abonnes.hasMany(db.interventions) //many to One
+db.abonnes.hasMany(db.interventions) //Many to One
 db.interventions.belongsTo(db.abonnes)
 
 db.interventions.belongsTo(db.agents)
@@ -62,8 +62,6 @@ db.status.hasOne(db.utilisateurs)
 db.utilisateurs.belongsToMany(db.status, { through: 'utilisateurs_roles'})
 db.status.belongsToMany(db.utilisateurs, { through:'utilisateurs_roles'})
 */
-
-
 
 /*
 db.status.belongsToMany(db.user, {
