@@ -20,6 +20,7 @@ router.get('/', function (req, res, next) {
     res.render('index', {title: 'Express'});
 });
 
+
 router.get('/agents', function (req, res, next) {
     var agents = Agents.findAll({
         raw: true,
@@ -215,6 +216,17 @@ router.post('/create/abonne', function (req, res, next) {
         });
     }
 });
+
+router.delete('/delete/abonne', function(req,res,next){
+    console.log(req.body.id);
+    Abonnes.destroy({
+        where:{
+            id: req.body.id
+        }
+    }).then(()=>{
+        return res.status(204).send({"success":"ok"})})
+})
+
 
 /**
  * @swagger
@@ -416,14 +428,14 @@ router.post('/create/type', function (req, res, next) {
  *                   type: string
  */
 router.get('/adresses', function (req, res, next) {
-    var etats = Adresses.findAll({
+    var adresses = Adresses.findAll({
         include: Coordonnees,
         raw: true,
         id: req.params.id,
     }).then(result => {
         return res.status(200).send(result);
     }).catch(err => console.log(err))
-    return etats;
+    return adresses;
 });
 
 /**
@@ -482,6 +494,17 @@ router.post('/create/adresse', function (req, res, next) {
         res.status(201).send(adresse);
     });
 });
+
+router.delete('/delete/adresse', function(req,res,next){
+    console.log(req.body.id);
+    Adresses.remove({
+        where:{
+            id: req.body.id
+        }
+    }).then(()=>{
+        return res.status(204).send({"success":"ok"})})
+})
+
 
 /**
  * @swagger
@@ -573,6 +596,36 @@ router.post('/create/personne', function (req, res, next) {
         res.status(201).send(personne);
     });
 });
+
+/**
+ * @swagger
+ * paths:
+ *  /delete/personne:
+ *      delete:
+ *       summary: Supprime une Personne
+ *       description: Supprime une personne
+ *       reponses:
+ *       204:
+ *         description: Suppression Ok
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: string
+ *                   properties:
+ */
+router.delete('/delete/personne', function(req,res,next){
+    console.log(req.body.id);
+    Personnes.destroy({
+        where:{
+            id: req.body.id
+        }
+    }).then(()=>{
+        return res.status(204).send({"success":"ok"})})
+})
+
 
 /**
  * @swagger
@@ -676,6 +729,32 @@ router.post('/create/intervention', function (req, res, next) {
 
 /**
  * @swagger
+ * paths:
+ *  /delete/intervention:
+ *      delete:
+ *       summary: Supprime une intervention
+ *       description: Supprime l'intervention
+ *       reponses:
+ *       200:
+ *         description: Réponse Valide
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ */
+router.delete('/delete/intervention/:id', function(req,res,next){
+    console.log(req.params.id);
+    console.log("destroy");
+    Interventions.destroy({
+        where:{
+            id: req.params.id
+        }
+        }).then(()=>{
+            return res.status(204).send({"success":"ok"})})
+})
+
+/**
+ * @swagger
  * /create/utilisateur:
  *   post:
  *     summary: Crée une utilisateur.
@@ -739,6 +818,16 @@ router.post('/create/utilisateur', function (req, res) {
     }
 
 });
+
+router.delete('/delete/utilisateur', function(req,res,next){
+    console.log(req.body.id);
+    Utilisateurs.destroy({
+        where:{
+            id: req.body.id
+        }
+    }).then(()=>{
+        return res.status(204).send({"success":"ok"})})
+})
 
 /**
  * @swagger

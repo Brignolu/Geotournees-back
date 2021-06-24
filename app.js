@@ -62,12 +62,9 @@ app.use(express.static(path.join(__dirname, 'public')));
 // On autorise les origines multiples
 app.use((req, res, next) => {
     //Indicates whether the response can be shared.
-    res.setHeader("Access-Control-Allow-Origin", "*");
-
-    res.header(
-        "Access-Control-Allow-Headers",
-        "Origin, X-Requested-With, Content-Type, Accept"
-    );
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Headers", "*");
+    res.header("Access-Control-Allow-Methods", ["GET,PUT,POST,DELETE,OPTIONS"]);
     next();
 });
 // Swagger Ui Documentation
