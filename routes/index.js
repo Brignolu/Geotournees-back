@@ -20,7 +20,24 @@ router.get('/', function (req, res, next) {
     res.render('index', {title: 'Express'});
 });
 
-
+/**
+ * @swagger
+ * /agents:
+ *   get:
+ *     summary: Renvoie tous les agents.
+ *     responses:
+ *       200:
+ *         description: Réponse Valide
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 id:
+ *                   type: integer
+ *                 nom:
+ *                   type: string
+ */
 router.get('/agents', function (req, res, next) {
     var agents = Agents.findAll({
         raw: true,
@@ -30,6 +47,77 @@ router.get('/agents', function (req, res, next) {
     }).catch(err => console.log(err))
     return agents;
 });
+/**
+ * @swagger
+ * /create/agent:
+ *   post:
+ *     summary: Crée un agent.
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               nom:
+ *                 type: string
+ *                 format: float
+ *     responses:
+ *       401:
+ *         description: Opération Interdite
+ *       201:
+ *         description: Réponse Valide
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 id:
+ *                   type: integer
+ *                 nom:
+ *                   type: string
+ */
+router.post('/create/agent', function (req, res, next) {
+    // Vérifie si l'objet est vide en verifiant si il ne contient aucune clé et en verifiant si le constructeur est bien un objet
+    if (Object.keys(req.body).length === 0 && req.body.constructor === Object) {
+        res.status(401).send("Requête Invalide")
+    } else {
+        Agents.create(
+            {
+                nom: req.body.nom,
+            }
+        ).then(agent => {
+            res.status(201).send(agent);
+        }).catch(err => console.log(err));
+    }
+});
+/**
+ * @swagger
+ * paths:
+ *  /delete/agent/:id:
+ *      delete:
+ *       summary: Supprime un agent
+ *       description: Supprime un agent
+ *       responses:
+ *       204:
+ *         description: Suppression Ok
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: string
+ *                   properties:
+ */
+router.delete('/delete/agent/:id', function(req,res,next){
+    console.log(req.params.id);
+    Agents.destroy({
+        where:{
+            id: req.params.id
+        }
+    }).then(()=>{
+        return res.status(204).send({"success":"ok"})})
+})
 
 /**
  * @swagger
@@ -122,6 +210,34 @@ router.post('/create/coordonnees', function (req, res, next) {
         }).catch(err => console.log(err));
     }
 });
+/**
+ * @swagger
+ * paths:
+ *  /delete/coordonnees/:id:
+ *      delete:
+ *       summary: Supprime une coordonnée
+ *       description: Supprime une coordonnée
+ *       responses:
+ *       204:
+ *         description: Suppression Ok
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: string
+ *                   properties:
+ */
+router.delete('/delete/cordonnees/:id', function(req,res,next){
+    console.log(req.params.id);
+    Coordonnees.destroy({
+        where:{
+            id: req.params.id
+        }
+    }).then(()=>{
+        return res.status(204).send({"success":"ok"})})
+})
 
 /**
  * @swagger
@@ -217,11 +333,30 @@ router.post('/create/abonne', function (req, res, next) {
     }
 });
 
-router.delete('/delete/abonne', function(req,res,next){
-    console.log(req.body.id);
+/**
+ * @swagger
+ * paths:
+ *  /delete/abonne/:id:
+ *      delete:
+ *       summary: Supprime un abonné
+ *       description: Supprime un abonné
+ *       responses:
+ *       204:
+ *         description: Suppression Ok
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: string
+ *                   properties:
+ */
+router.delete('/delete/abonne/:id', function(req,res,next){
+    console.log(req.params.id);
     Abonnes.destroy({
         where:{
-            id: req.body.id
+            id: req.params.id
         }
     }).then(()=>{
         return res.status(204).send({"success":"ok"})})
@@ -295,6 +430,35 @@ router.post('/create/etat', function (req, res, next) {
 
 /**
  * @swagger
+ * paths:
+ *  /delete/etat/:id:
+ *      delete:
+ *       summary: Supprime un etat
+ *       description: Supprime une etat
+ *       responses:
+ *       204:
+ *         description: Suppression Ok
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: string
+ *                   properties:
+ */
+router.delete('/delete/etat/:id', function(req,res,next){
+    console.log(req.params.id);
+    Etats.remove({
+        where:{
+            id: req.params.id
+        }
+    }).then(()=>{
+        return res.status(204).send({"success":"ok"})})
+})
+
+/**
+ * @swagger
  * /motifs:
  *   get:
  *     summary: Retourne les motifs.
@@ -338,6 +502,35 @@ router.post('/create/motif', function (req, res, next) {
         res.send(motif);
     });
 });
+
+/**
+ * @swagger
+ * paths:
+ *  /delete/motif/:id:
+ *      delete:
+ *       summary: Supprime un Motif
+ *       description: Supprime un Motif
+ *       responses:
+ *       204:
+ *         description: Suppression Ok
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: string
+ *                   properties:
+ */
+router.delete('/delete/motif/:id', function(req,res,next){
+    console.log(req.params.id);
+    Motifs.remove({
+        where:{
+            id: req.params.id
+        }
+    }).then(()=>{
+        return res.status(204).send({"success":"ok"})})
+})
 
 /**
  * @swagger
@@ -409,11 +602,41 @@ router.post('/create/type', function (req, res, next) {
 /**
  * @swagger
  * paths:
+ *  /delete/type/:id:
+ *      delete:
+ *       summary: Supprime un utilisateur
+ *       description: Supprime un utilisateurs
+ *       responses:
+ *       204:
+ *         description: Suppression Ok
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: string
+ *                   properties:
+ */
+router.delete('/delete/type/:id', function(req,res,next){
+    console.log(req.params.id);
+    TypesInter.destroy({
+        where:{
+            id: req.params.id
+        }
+    }).then(()=>{
+        return res.status(204).send({"success":"ok"})})
+})
+
+
+/**
+ * @swagger
+ * paths:
  *  /adresses:
  *      get:
  *       summary: Retourne les adresses
  *       description: Retourne les adresses
- *       reponses:
+ *       responses:
  *       200:
  *         description: Créé
  *         content:
@@ -495,6 +718,25 @@ router.post('/create/adresse', function (req, res, next) {
     });
 });
 
+/**
+ * @swagger
+ * paths:
+ *  /delete/adresse:
+ *      delete:
+ *       summary: Supprime une Adresse
+ *       description: Supprime une personne
+ *       responses:
+ *       204:
+ *         description: Suppression Ok
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: string
+ *                   properties:
+ */
 router.delete('/delete/adresse', function(req,res,next){
     console.log(req.body.id);
     Adresses.remove({
@@ -513,7 +755,7 @@ router.delete('/delete/adresse', function(req,res,next){
  *      get:
  *       summary: Retourne les personnes
  *       description: Retourne les personnes
- *       reponses:
+ *       responses:
  *       200:
  *         description: Réponse Valide
  *         content:
@@ -604,7 +846,7 @@ router.post('/create/personne', function (req, res, next) {
  *      delete:
  *       summary: Supprime une Personne
  *       description: Supprime une personne
- *       reponses:
+ *       responses:
  *       204:
  *         description: Suppression Ok
  *         content:
@@ -634,7 +876,7 @@ router.delete('/delete/personne', function(req,res,next){
  *      get:
  *       summary: Retourne les interventions
  *       description: Retourne les interventions
- *       reponses:
+ *       responses:
  *       200:
  *         description: Réponse Valide
  *         content:
@@ -734,9 +976,9 @@ router.post('/create/intervention', function (req, res, next) {
  *      delete:
  *       summary: Supprime une intervention
  *       description: Supprime l'intervention
- *       reponses:
- *       200:
- *         description: Réponse Valide
+ *       responses:
+ *       204:
+ *         description: Suppression OK
  *         content:
  *           application/json:
  *             schema:
@@ -752,6 +994,42 @@ router.delete('/delete/intervention/:id', function(req,res,next){
         }).then(()=>{
             return res.status(204).send({"success":"ok"})})
 })
+
+/**
+ * @swagger
+ * paths:
+ *  /utilisateurs:
+ *      get:
+ *       summary: Retourne les utilisateurs
+ *       description: Retourne les utilisateurs
+ *       responses:
+ *       200:
+ *         description: Réponse Valide
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 id:
+ *                   type: integer
+ *                   properties:
+ *                 nom:
+ *                   type: string
+ *                 nom_utilisateur:
+ *                   type: string
+ *                 password:
+ *                   type: string
+ *                 statusId:
+ *                   type:integer
+ */
+router.get('/utilisateurs', function (req, res, next) {
+    var utilisateurs = Utilisateurs.findAll({
+    }).then(result => {
+        return res.status(200).send(result)
+    }).catch(err => {
+        console.log(err)
+    });
+});
 
 /**
  * @swagger
@@ -819,11 +1097,30 @@ router.post('/create/utilisateur', function (req, res) {
 
 });
 
-router.delete('/delete/utilisateur', function(req,res,next){
-    console.log(req.body.id);
+/**
+ * @swagger
+ * paths:
+ *  /delete/utilisateur/:id:
+ *      delete:
+ *       summary: Supprime un utilisateur
+ *       description: Supprime un utilisateurs
+ *       responses:
+ *       204:
+ *         description: Suppression Ok
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: string
+ *                   properties:
+ */
+router.delete('/delete/utilisateur/:id', function(req,res,next){
+    console.log(req.params.id);
     Utilisateurs.destroy({
         where:{
-            id: req.body.id
+            id: req.params.id
         }
     }).then(()=>{
         return res.status(204).send({"success":"ok"})})
@@ -899,9 +1196,28 @@ router.post('/login', function (req, res) {
     }
 });
 
+/**
+ * @swagger
+ * paths:
+ *  /logout:
+ *      get:
+ *       summary: Logout de la personne
+ *       description: Supprime la Session utilisateur
+ *       responses:
+ *       200:
+ *         description: OK
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: string
+ *                   properties:
+ */
 router.get('/logout', estAuth, function (req, res) {
     req.session.destroy();
-    res.send({
+    res.status(200).send({
         success: false,
         etat: "Au revoir !"
     });
