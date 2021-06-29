@@ -16,6 +16,9 @@ var swaggerUi = require('swagger-ui-express');
 require('dotenv').config();
 
 
+
+
+
 const swaggerDefinition = {
     openapi: '3.0.0',
     info: {
@@ -46,6 +49,8 @@ var usersRouter = require('./routes/users');
 
 // Init de l'app
 var app = express();
+
+
 // Init de la db
 const db = require('./config/db.config.js');
 
