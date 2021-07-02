@@ -8,11 +8,12 @@ module.exports = (sequelize, Sequelize) => {
         },
         date: {
             type: Sequelize.DATE(6)
-        }/*,
-        annotation:{
+        },
+        commentaires:{
             allowNull: true,
             type: Sequelize.STRING
         },
+        /*
         immatriculation:{
             allowNull: true,
             type: Sequelize.STRING

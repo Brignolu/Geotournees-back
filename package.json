@@ -8,6 +8,7 @@
     "test": "nyc mocha test.js"
   },
   "dependencies": {
+    "axios": "^0.21.1",
     "bcryptjs": "2.4.3",
     "body-parser": "1.18.3",
     "chai": "4.3.4",
@@ -23,6 +24,7 @@
     "jsonwebtoken": "8.5.1",
     "mariadb": "2.5.3",
     "mocha": "8.4.0",
+    "moment": "^2.29.1",
     "morgan": "~1.9.1",
     "nyc": "15.1.0",
     "proxyquire": "2.1.3",

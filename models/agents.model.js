@@ -9,6 +9,9 @@ module.exports = (sequelize, Sequelize) => {
         nom: {
             type: Sequelize.STRING
         },
+        identifiant_soplanning: {
+            type: Sequelize.STRING
+        },
     });
 
     return Agent;

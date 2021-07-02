@@ -36,10 +36,8 @@ io.on('connection', (socket) => {
   socket.on('connexion', function(data) {
     console.log('Connexion : ' + data)
   });
-  socket.on('nouvelleintervention', function() {
-    console.log('------------------------------------------------------------------------------------------------------')
-    console.log('Receive nouvelleInterventino')
-    console.log('emission refreshinterventionlist')
+  socket.on('ws-refresh-intervention', function() {
+    console.log('ws-refresh-intervention')
     socket.broadcast.emit("refreshinterventionlist")
   });
 })

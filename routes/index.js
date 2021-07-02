@@ -1,6 +1,9 @@
 var express = require('express');
 var router = express.Router();
 var db = require('../config/db.config.js')
+var axios = require('axios')
+const { Op } = require("sequelize");
+var moment = require('moment')
 
 // Chargement des modèles
 const Abonnes = db.abonnes
@@ -14,6 +17,7 @@ const Personnes = db.personnes
 const Interventions = db.interventions
 const TypesInter = db.typesinter
 const Utilisateurs = db.utilisateurs
+moment.locale('fr-FR')
 
 
 router.get('/', function (req, res, next) {
@@ -109,14 +113,15 @@ router.post('/create/agent', function (req, res, next) {
  *                   type: string
  *                   properties:
  */
-router.delete('/delete/agent/:id', function(req,res,next){
+router.delete('/delete/agent/:id', function (req, res, next) {
     console.log(req.params.id);
     Agents.destroy({
-        where:{
+        where: {
             id: req.params.id
         }
-    }).then(()=>{
-        return res.status(204).send({"success":"ok"})})
+    }).then(() => {
+        return res.status(204).send({"success": "ok"})
+    })
 })
 
 /**
@@ -229,14 +234,15 @@ router.post('/create/coordonnees', function (req, res, next) {
  *                   type: string
  *                   properties:
  */
-router.delete('/delete/cordonnees/:id', function(req,res,next){
+router.delete('/delete/cordonnees/:id', function (req, res, next) {
     console.log(req.params.id);
     Coordonnees.destroy({
-        where:{
+        where: {
             id: req.params.id
         }
-    }).then(()=>{
-        return res.status(204).send({"success":"ok"})})
+    }).then(() => {
+        return res.status(204).send({"success": "ok"})
+    })
 })
 
 /**
@@ -352,14 +358,15 @@ router.post('/create/abonne', function (req, res, next) {
  *                   type: string
  *                   properties:
  */
-router.delete('/delete/abonne/:id', function(req,res,next){
+router.delete('/delete/abonne/:id', function (req, res, next) {
     console.log(req.params.id);
     Abonnes.destroy({
-        where:{
+        where: {
             id: req.params.id
         }
-    }).then(()=>{
-        return res.status(204).send({"success":"ok"})})
+    }).then(() => {
+        return res.status(204).send({"success": "ok"})
+    })
 })
 
 
@@ -447,14 +454,15 @@ router.post('/create/etat', function (req, res, next) {
  *                   type: string
  *                   properties:
  */
-router.delete('/delete/etat/:id', function(req,res,next){
+router.delete('/delete/etat/:id', function (req, res, next) {
     console.log(req.params.id);
     Etats.remove({
-        where:{
+        where: {
             id: req.params.id
         }
-    }).then(()=>{
-        return res.status(204).send({"success":"ok"})})
+    }).then(() => {
+        return res.status(204).send({"success": "ok"})
+    })
 })
 
 /**
@@ -522,14 +530,15 @@ router.post('/create/motif', function (req, res, next) {
  *                   type: string
  *                   properties:
  */
-router.delete('/delete/motif/:id', function(req,res,next){
+router.delete('/delete/motif/:id', function (req, res, next) {
     console.log(req.params.id);
     Motifs.remove({
-        where:{
+        where: {
             id: req.params.id
         }
-    }).then(()=>{
-        return res.status(204).send({"success":"ok"})})
+    }).then(() => {
+        return res.status(204).send({"success": "ok"})
+    })
 })
 
 /**
@@ -618,14 +627,15 @@ router.post('/create/type', function (req, res, next) {
  *                   type: string
  *                   properties:
  */
-router.delete('/delete/type/:id', function(req,res,next){
+router.delete('/delete/type/:id', function (req, res, next) {
     console.log(req.params.id);
     TypesInter.destroy({
-        where:{
+        where: {
             id: req.params.id
         }
-    }).then(()=>{
-        return res.status(204).send({"success":"ok"})})
+    }).then(() => {
+        return res.status(204).send({"success": "ok"})
+    })
 })
 
 
@@ -737,14 +747,15 @@ router.post('/create/adresse', function (req, res, next) {
  *                   type: string
  *                   properties:
  */
-router.delete('/delete/adresse', function(req,res,next){
+router.delete('/delete/adresse', function (req, res, next) {
     console.log(req.body.id);
     Adresses.remove({
-        where:{
+        where: {
             id: req.body.id
         }
-    }).then(()=>{
-        return res.status(204).send({"success":"ok"})})
+    }).then(() => {
+        return res.status(204).send({"success": "ok"})
+    })
 })
 
 
@@ -858,14 +869,15 @@ router.post('/create/personne', function (req, res, next) {
  *                   type: string
  *                   properties:
  */
-router.delete('/delete/personne', function(req,res,next){
+router.delete('/delete/personne', function (req, res, next) {
     console.log(req.body.id);
     Personnes.destroy({
-        where:{
+        where: {
             id: req.body.id
         }
-    }).then(()=>{
-        return res.status(204).send({"success":"ok"})})
+    }).then(() => {
+        return res.status(204).send({"success": "ok"})
+    })
 })
 
 
@@ -984,15 +996,16 @@ router.post('/create/intervention', function (req, res, next) {
  *             schema:
  *               type: object
  */
-router.delete('/delete/intervention/:id', function(req,res,next){
+router.delete('/delete/intervention/:id', function (req, res, next) {
     console.log(req.params.id);
     console.log("destroy");
     Interventions.destroy({
-        where:{
+        where: {
             id: req.params.id
         }
-        }).then(()=>{
-            return res.status(204).send({"success":"ok"})})
+    }).then(() => {
+        return res.status(204).send({"success": "ok"})
+    })
 })
 
 /**
@@ -1023,8 +1036,7 @@ router.delete('/delete/intervention/:id', function(req,res,next){
  *                   type:integer
  */
 router.get('/utilisateurs', function (req, res, next) {
-    var utilisateurs = Utilisateurs.findAll({
-    }).then(result => {
+    var utilisateurs = Utilisateurs.findAll({}).then(result => {
         return res.status(200).send(result)
     }).catch(err => {
         console.log(err)
@@ -1116,14 +1128,15 @@ router.post('/create/utilisateur', function (req, res) {
  *                   type: string
  *                   properties:
  */
-router.delete('/delete/utilisateur/:id', function(req,res,next){
+router.delete('/delete/utilisateur/:id', function (req, res, next) {
     console.log(req.params.id);
     Utilisateurs.destroy({
-        where:{
+        where: {
             id: req.params.id
         }
-    }).then(()=>{
-        return res.status(204).send({"success":"ok"})})
+    }).then(() => {
+        return res.status(204).send({"success": "ok"})
+    })
 })
 
 /**
@@ -1258,6 +1271,76 @@ router.get('/auth/etats', [estAuth, estAdmin], function (req, res, next) {
         return res.status(200).send(result);
     }).catch(err => console.log(err))
     return etats;
+});
+
+// ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- THIS IS A TEST FOR SOPLANNING API
+router.post('/testsynchroplanning/:date', async function (req, res) {
+    //composition de l'adresse
+    let apiUrl = 'https://etudiant-cd74.soplanning.pro';
+    let suffix = '/api/endpoint/tasks?';
+    let requestdateformatted = moment(req.params.date).utc()
+    let tomorrowdateformatted = moment(req.params.date).add(1, 'days').utc()
+
+    console.log(requestdateformatted)
+    console.log(tomorrowdateformatted)
+    //requete tous les agents
+    let agents =  await Agents.findAll()
+    console.log(agents)
+
+    for (let i = 0; i < agents.length; i++) {
+        console.log(agents[i].identifiant_soplanning);
+        var curr_identifiant_so_planning = agents[i].identifiant_soplanning
+        //on requete les interventions par date et agent
+        let interventions = await Interventions.findAll({
+            include: [
+                {model: Motifs},
+                {model: TypesInter},
+                {model: Agents},
+                {model: Etats},
+                {model: Abonnes, include: {model: Personnes, include: {model: Adresses, include: {model: Coordonnees}}}
+                }],
+            where: {
+                date: {
+                    [Op.gte]: requestdateformatted,
+                    [Op.lte]: tomorrowdateformatted
+                },
+                agentId: agents[i].id
+            }
+        })
+
+        let comments = "";
+        for (let j = 0; j < interventions.length; j++) {
+            let datestr = moment(interventions[j].date).utc().format("LLLL")
+            // booleen qui compare nos dates
+            let datecomp = moment(interventions[j].date).isSame(requestdateformatted, 'day');
+            console.log(datecomp)
+
+            //let datestr = new Date(data[i].date).getDate().toString() + "/" + new Date(data[i].date).getMonth().toString() + "/" + new Date(data[i].date).getFullYear().toString()
+            //new Date(data[i].date).toLocaleString('fr-FR', { timeZone: 'UTC' })
+            comments += "" + datestr + " | " + interventions[j].abonne.personne.nom + " " + interventions[j].abonne.personne.prenom + " | " + interventions[j].abonne.personne.adresses.ville + " | " + interventions[j].abonne.numero_abo + " | " + "COMMENTAIRES" + "\n"
+        }
+        console.log(comments)
+
+        if(comments != ""){
+            let apiParameters = "task_id=&user_id=" + curr_identifiant_so_planning + "&project_id=Install&link_id&start_date=" +  req.params.date + "&end_date=&start_time=" + requestdateformatted.format('HH:mm') + "&end_time=" + "23:00" + "&duration=&status_id=todo&title&comment=" + comments + "&link&resource_id=&place_id&milestone=&custom_field=&creator_id";
+            var config = {
+                method: 'post',
+                url: apiUrl + suffix + apiParameters,
+                headers: {
+                    'SOPLANNING-API': 'api',
+                    'Cookie': 'sop3170planning_=t3m4fat8q2n3778h6cuce35s06'
+                }
+            };
+            let soplanning = await axios(config).then((response) =>{
+                console.log(response.data)
+            } ).catch((err) => console.log(err))
+            console.log(soplanning)
+        }
+    }
+    return res.status(201).send({message: "all created shit"})
+
+
+
 });
 
 module.exports = router;
