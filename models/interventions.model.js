@@ -13,11 +13,11 @@ module.exports = (sequelize, Sequelize) => {
             allowNull: true,
             type: Sequelize.STRING
         },
-        /*
-        immatriculation:{
-            allowNull: true,
-            type: Sequelize.STRING
-        },*/
+        soplanning:{
+            allowNull: false,
+            type: Sequelize.BOOLEAN,
+            defaultValue: false,
+        },
     });
 
     return Intervention;

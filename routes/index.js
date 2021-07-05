@@ -2,7 +2,7 @@ var express = require('express');
 var router = express.Router();
 var db = require('../config/db.config.js')
 var axios = require('axios')
-const { Op } = require("sequelize");
+const {Op} = require("sequelize");
 var moment = require('moment')
 
 // Chargement des modèles
@@ -975,7 +975,8 @@ router.post('/create/intervention', function (req, res, next) {
         abonneId: req.body.abonneId,
         agentId: req.body.agentId,
         typeId: req.body.typeId,
-        motifId: req.body.motifId
+        motifId: req.body.motifId,
+        commentaires: req.body.commentaires
     }).then(intervention => {
         res.status(200).send(intervention);
     });
@@ -1245,6 +1246,7 @@ function estAuth(req, res, next) {
     }
 }
 
+/*
 function estAdmin(req, res, next) {
     if (req.session.utilisateur.statusId === 3) {
         console.log(req.session);
@@ -1262,7 +1264,7 @@ function estMode(req, res, next) {
         return res.status(403).send({etat: "Rôle Moderateur requis"});
     }
 }
-
+// Exemple de route avec permissions | Fonctionne grâce aux middlewares précédents
 router.get('/auth/etats', [estAuth, estAdmin], function (req, res, next) {
     var etats = Etats.findAll({
         raw: true,
@@ -1272,75 +1274,141 @@ router.get('/auth/etats', [estAuth, estAdmin], function (req, res, next) {
     }).catch(err => console.log(err))
     return etats;
 });
+*/
 
-// ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- THIS IS A TEST FOR SOPLANNING API
-router.post('/testsynchroplanning/:date', async function (req, res) {
+// ------------------------ THIS IS A TEST FOR SOPLANNING API
+router.get('/synchronisationplanning', async function (req, res) {
     //composition de l'adresse
     let apiUrl = 'https://etudiant-cd74.soplanning.pro';
-    let suffix = '/api/endpoint/tasks?';
-    let requestdateformatted = moment(req.params.date).utc()
-    let tomorrowdateformatted = moment(req.params.date).add(1, 'days').utc()
+    let suffixUrl = '/api/endpoint/tasks?';
+    let todayDateUtc = moment().utc().hours(0).minutes(0).seconds(0)
+    let tomorrowDateUtc = moment().utc().hours(0).minutes(0).seconds(0).add(1, 'days')
+    let todayPlusOneMonthDateUtc = moment().utc().hours(0).minutes(0).seconds(0).add(1, 'month')
 
-    console.log(requestdateformatted)
-    console.log(tomorrowdateformatted)
-    //requete tous les agents
-    let agents =  await Agents.findAll()
-    console.log(agents)
-
-    for (let i = 0; i < agents.length; i++) {
-        console.log(agents[i].identifiant_soplanning);
-        var curr_identifiant_so_planning = agents[i].identifiant_soplanning
-        //on requete les interventions par date et agent
-        let interventions = await Interventions.findAll({
-            include: [
-                {model: Motifs},
-                {model: TypesInter},
-                {model: Agents},
-                {model: Etats},
-                {model: Abonnes, include: {model: Personnes, include: {model: Adresses, include: {model: Coordonnees}}}
-                }],
-            where: {
-                date: {
-                    [Op.gte]: requestdateformatted,
-                    [Op.lte]: tomorrowdateformatted
-                },
-                agentId: agents[i].id
-            }
-        })
-
-        let comments = "";
-        for (let j = 0; j < interventions.length; j++) {
-            let datestr = moment(interventions[j].date).utc().format("LLLL")
-            // booleen qui compare nos dates
-            let datecomp = moment(interventions[j].date).isSame(requestdateformatted, 'day');
-            console.log(datecomp)
-
-            //let datestr = new Date(data[i].date).getDate().toString() + "/" + new Date(data[i].date).getMonth().toString() + "/" + new Date(data[i].date).getFullYear().toString()
-            //new Date(data[i].date).toLocaleString('fr-FR', { timeZone: 'UTC' })
-            comments += "" + datestr + " | " + interventions[j].abonne.personne.nom + " " + interventions[j].abonne.personne.prenom + " | " + interventions[j].abonne.personne.adresses.ville + " | " + interventions[j].abonne.numero_abo + " | " + "COMMENTAIRES" + "\n"
+    // On supprime toutes les interventions qui appartiennent au projet install du mois courant
+    let apiGetParameters = "start_date=" + todayDateUtc.format('YYYY-MM-DD') + "&end_date=" + todayPlusOneMonthDateUtc.format('YYYY-MM-DD') + "&project_id=Install";
+    var config = {
+        method: 'get',
+        url: apiUrl + suffixUrl + apiGetParameters,
+        headers: {
+            'SOPLANNING-API': 'api',
+            'Cookie': 'sop3170planning_=t3m4fat8q2n3778h6cuce35s06'
         }
-        console.log(comments)
+    };
 
-        if(comments != ""){
-            let apiParameters = "task_id=&user_id=" + curr_identifiant_so_planning + "&project_id=Install&link_id&start_date=" +  req.params.date + "&end_date=&start_time=" + requestdateformatted.format('HH:mm') + "&end_time=" + "23:00" + "&duration=&status_id=todo&title&comment=" + comments + "&link&resource_id=&place_id&milestone=&custom_field=&creator_id";
-            var config = {
-                method: 'post',
-                url: apiUrl + suffix + apiParameters,
-                headers: {
-                    'SOPLANNING-API': 'api',
-                    'Cookie': 'sop3170planning_=t3m4fat8q2n3778h6cuce35s06'
-                }
-            };
-            let soplanning = await axios(config).then((response) =>{
-                console.log(response.data)
-            } ).catch((err) => console.log(err))
-            console.log(soplanning)
-        }
+    let soPlanningAlreadyExistingTasks = await axios(config).then(function (response) {
+        return response.data
+    }).catch(err => console.log(err))
+
+    let soPlanningTaskIds = []
+    for (let v = 0; v < soPlanningAlreadyExistingTasks.data.length; v++) {
+        soPlanningTaskIds.push(soPlanningAlreadyExistingTasks.data[v].task_id)
     }
-    return res.status(201).send({message: "all created shit"})
+    for (let w = 0; w < soPlanningTaskIds.length; w++) {
+        var config = {
+            method: 'delete',
+            url: apiUrl + "/api/endpoint/tasks/" + soPlanningTaskIds[w],
+            headers: {
+                'SOPLANNING-API': 'api',
+                'Cookie': 'sop3170planning_=t3m4fat8q2n3778h6cuce35s06'
+            }
+        };
+        await axios(config).then(function () {
+            console.log('delete')
+        }).catch(err => console.log(err))
+    }
+
+    /*
+        // DEBUG : dates UTC du jour, du lendemain, du jour + 1 mois
+        console.log('------------------------------------------')
+        console.log(requestdateformatted)
+        console.log(tomorrowdateformatted)
+        console.log(requestdateformattedmonth)
+        console.log('------------------------------------------')
+    */
+
+    // requête tous les agents
+    let agents = await Agents.findAll()
+
+    // On parcoure jour après jour
+    while (!tomorrowDateUtc.isSame(todayPlusOneMonthDateUtc, 'day')) {
+        for (let i = 0; i < agents.length; i++) {
+
+            var soPlanningIdCurrentAgent = agents[i].identifiant_soplanning
+
+            //on requete les interventions jour par jour pour chaque agent
+            let interventions = await Interventions.findAll({
+                include: [
+                    {model: Motifs},
+                    {model: TypesInter},
+                    {model: Agents},
+                    {model: Etats},
+                    {
+                        model: Abonnes,
+                        include: {model: Personnes, include: {model: Adresses, include: {model: Coordonnees}}}
+                    }],
+                where: {
+                    date: {
+                        [Op.gte]: todayDateUtc,
+                        [Op.lte]: tomorrowDateUtc
+                    },
+                    agentId: agents[i].id,
+                }
+            })
+
+            let commentTask = "";
+            for (let j = 0; j < interventions.length; j++) {
+
+                // Si l'intervention est déjà presente dans SoPlanning | Ceci a été implementé en absence de méthode HTTP PUT dans l'API
+                if (interventions[j].soplanning) {
+                    await Interventions.update(
+                        {soplanning: false},
+                        {
+                            where: {
+                                id: interventions[j].id
+                            }
+                        }
+                    )
+                }
+
+                let dateString = moment(interventions[j].date).utc().format("LLLL")
+                commentTask += "" + dateString + " | " + interventions[j].abonne.personne.nom + " " + interventions[j].abonne.personne.prenom + " | " + interventions[j].abonne.personne.adresses.ville + " | " + interventions[j].abonne.numero_abo + " | " + interventions[j].commentaires + "\n"
+                await Interventions.update(
+                    {
+                        soplanning: true
+                    },
+                    {
+                        where: {
+                            id: interventions[j].id
+                        }
+                    }
+                )
+            }
 
 
+            if (commentTask != "") {
 
+                let apiParameters = "task_id=&user_id=" + soPlanningIdCurrentAgent + "&project_id=Install&link_id&start_date=" + todayDateUtc.format('YYYY-MM-DD') + "&end_date=&start_time=" + todayDateUtc.format('HH:mm') + "&end_time=" + "23:00" + "&duration=&status_id=todo&title&comment=" + commentTask + "&link&resource_id=&place_id&milestone=&custom_field=&creator_id";
+                var config = {
+                    method: 'post',
+                    url: apiUrl + suffixUrl + apiParameters,
+                    headers: {
+                        'SOPLANNING-API': 'api',
+                        'Cookie': 'sop3170planning_=t3m4fat8q2n3778h6cuce35s06'
+                    }
+                };
+                await axios(config).then((response) => {
+                }).catch((err) => console.log(err))
+
+            }
+        }
+        todayDateUtc.add(1, 'day')
+        tomorrowDateUtc.add(1, 'day')
+    }
+
+    return res.status(201).send({message: "OK"})
+
+    // TODO: Manque la duration quand on set un creneau plutôt qu'une start et end date.
 });
 
 module.exports = router;
