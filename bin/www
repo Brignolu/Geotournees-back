@@ -30,14 +30,12 @@ const io = require('socket.io')(server,{
 })
 console.log(io)
 io.on('connection', (socket) => {
-  console.log('socket connect on' + socket)
-  console.log(socket)
-  socket.emit('pong')
+  console.log('connection OK')
+  //socket.emit('pong')
   socket.on('connexion', function(data) {
     console.log('Connexion : ' + data)
   });
   socket.on('ws-refresh-intervention', function() {
-    console.log('ws-refresh-intervention')
     socket.broadcast.emit("refreshinterventionlist")
   });
 })

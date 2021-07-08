@@ -880,6 +880,36 @@ router.delete('/delete/personne', function (req, res, next) {
     })
 })
 
+/**
+ * @swagger
+ * paths:
+ *  /delete/abonne/personne/:id:
+ *      delete:
+ *       summary: Supprime une Personne lié à un abonné
+ *       description: Supprime une personne
+ *       responses:
+ *       204:
+ *         description: Suppression Ok
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: string
+ *                   properties:
+ */
+router.delete('/delete/abonne/personne/:id', function (req, res, next) {
+    console.log(req.params.id);
+    Personnes.destroy({
+        where: {
+            abonneId: req.params.id
+        }
+    }).then(() => {
+        return res.status(204).send({"success": "ok"})
+    })
+})
+
 
 /**
  * @swagger
