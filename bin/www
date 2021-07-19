@@ -28,9 +28,8 @@ const io = require('socket.io')(server,{
     methods: ["GET", "POST"]
   }
 })
-console.log(io)
 io.on('connection', (socket) => {
-  console.log('connection OK')
+  console.log('SOCKET OK')
   //socket.emit('pong')
   socket.on('connexion', function(data) {
     console.log('Connexion : ' + data)
